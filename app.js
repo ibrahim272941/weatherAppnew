@@ -27,8 +27,24 @@ const getWeatherData = async () => {
     const res = await fetch(url);
     const data = await res.json();
     const { main, name, sys, weather } = data;
-    console.log(data);
 
+    const cityList = Array.from(resultArea.querySelectorAll('.city'));
+
+    if (cityList.length > 0) {
+      const filteredCity = cityList.filter(
+        (item) =>
+          item.querySelector('.cityName span').innerText.toLowerCase() ==
+          name.toLowerCase()
+      );
+      if (filteredCity.length > 0) {
+        warning.innerText = `Sie kennen das Wettervorhersage von ${
+          filteredCity[0].querySelector('.cityName span').innerText
+        }bereits, suchen Sie bitte nach einer anderen Stadt`;
+        form.reset();
+        formInput.focus();
+        return;
+      }
+    }
     //!------getCountryInfo---------//////
     const response = await fetch(
       `https://restcountries.com/v3.1/alpha/${sys.country}`
@@ -45,7 +61,7 @@ const getWeatherData = async () => {
       languages,
       population,
     } = data2[0];
-    console.log(data2[0]);
+
     const iconUrl = `https://openweathermap.org/img/wn/${weather[0].icon}@4x.png`;
     cityCard.innerHTML = ` <div class="head">
     <h2 class="cityName"><span>${name}</span><sup>${sys.country}</sup>
@@ -77,12 +93,11 @@ const getWeatherData = async () => {
                         <h4 class="countryLang">${Object.values(
                           languages
                         )}</h4>`;
-
+    form.reset();
+    formInput.focus();
     cityCard.appendChild(countryInfo);
     resultArea.appendChild(cityCard);
     warning.innerText = '';
-    form.reset();
-    form.focus();
   } catch (error) {
     warning.innerText = `Die Stadt , die Sie gesucht haben , wurde nicht gefunden`;
   }
@@ -129,7 +144,7 @@ const getCurrentCityWeather = async (e) => {
 
   const iconUrl = `https://openweathermap.org/img/wn/${weather[0].icon}@4x.png`;
   currentCity.innerHTML = `<div class="cityCurrent">
-            <div>${date}</div>
+            <div class="date">${date}</div>
             <div class="head">
                 <h5 class="cityName"><span>${name}</span><sup>${
     sys.country
@@ -145,43 +160,3 @@ const getCurrentCityWeather = async (e) => {
             <img  class="cityIcon" src="${iconUrl}">
             <p>${weather[0].description}</p>`;
 };
-
-// const getCountryDataByName = async (a) => {
-//   const countryInfo = document.createElement('div');
-//   countryInfo.classList.add('country');
-//   const response = await fetch(`https://restcountries.com/v3.1/alpha/${a}`);
-//   if (!response.ok) throw new Error(`something is wrong! ${response.status}`);
-//   const data = await response.json();
-
-//   const {
-//     name: { official },
-//     flags: { png },
-//     capital,
-//     currencies,
-//     region,
-//     languages,
-//     population,
-//   } = data[0];
-
-//   countryInfo.innerHTML = `
-//                     <img src="${png}" alt="" class="countryImg">
-//                     <div class="countryData">
-//                         <h4 class="countryName">
-//                             ${official}
-//                         </h4>
-//                         <h6>${capital[0]}</h6>
-//                         <h5 class="countryRegion">${region}</h5>
-//                         <p class="countryCapital">${
-//                           Object.values(currencies)[0].name
-//                         }</p>
-//                         <p class="countryPop">${(
-//                           +population / 1_000_000
-//                         ).toFixed(1)}M People</p>
-//                         <div class="countryLang">${Object.values(
-//                           languages
-//                         )}</div>
-//                    `;
-//   //getWeatherData(countryInfo);
-//   return countryInfo;
-// };
-// console.log(getCountryDataByName('DE').then((e) => e));
